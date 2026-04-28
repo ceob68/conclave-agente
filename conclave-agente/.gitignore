@@ -1,0 +1,58 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.pyo
+
+# PyInstaller
+dist/
+build/
+*.spec.bak
+
+# Virtual environments
+venv/
+env/
+.venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# User data (generated at runtime)
+*.db
+*.sqlite
+*.sqlite3
+
+# Config overrides (user-specific)
+config/current_config.json
+
+# Logs
+*.log
+
+# Compiled installer output
+installer/output/
+
+# HuggingFace cache (too large for git)
+.cache/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Secrets
+*.env
+.env.local
+secrets.json

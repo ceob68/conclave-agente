@@ -1,0 +1,27 @@
+# CÓNCLAVE Agente — Python Dependencies
+# © 2026 ceob68 / Vaultly. All rights reserved.
+#
+# Install with:
+#   pip install -r requirements.txt
+#
+# For GPU support (CUDA 12.x), install PyTorch with CUDA first:
+#   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+
+# ─── UI Framework ─────────────────────────────────────────────────────────────
+PySide6>=6.7.0
+
+# ─── AI / Inference ───────────────────────────────────────────────────────────
+torch>=2.3.0
+torchvision>=0.18.0
+transformers>=4.44.0
+accelerate>=0.34.0
+bitsandbytes>=0.44.0
+sentencepiece>=0.2.0
+protobuf>=4.25.0
+
+# ─── HuggingFace Hub ──────────────────────────────────────────────────────────
+huggingface_hub>=0.24.0
+safetensors>=0.4.3
+
+# ─── Utilities ────────────────────────────────────────────────────────────────
+# (sqlite3 is included in Python standard library — no pip install needed)

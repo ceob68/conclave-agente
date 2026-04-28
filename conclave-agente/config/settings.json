@@ -1,0 +1,24 @@
+{
+  "app": {
+    "version": "1.0.0",
+    "language": "es",
+    "theme": "dark_enterprise"
+  },
+  "inference": {
+    "max_new_tokens": 600,
+    "temperature": 0.72,
+    "top_p": 0.92,
+    "repetition_penalty": 1.1,
+    "context_messages": 20
+  },
+  "vram": {
+    "gpu_budget_gb": 14,
+    "cpu_budget_gb": 16,
+    "aggressive_cleanup": true
+  },
+  "ui": {
+    "auto_scroll": true,
+    "show_log_in_statusbar": true,
+    "chat_font_size": 10
+  }
+}

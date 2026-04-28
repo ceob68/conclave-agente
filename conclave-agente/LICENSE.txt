@@ -1,0 +1,76 @@
+CÓNCLAVE AGENTE — LICENCIA DE USO PROPIETARIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+© 2026 ceob68 / Vaultly. Todos los derechos reservados.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+IMPORTANTE: LEA ESTE ACUERDO ANTES DE INSTALAR O USAR EL SOFTWARE.
+Al instalar, copiar o utilizar CÓNCLAVE Agente, usted acepta quedar
+vinculado por los términos de esta Licencia. Si no acepta los términos,
+no instale ni use el software.
+
+1. CONCESIÓN DE LICENCIA
+   Se le otorga una licencia personal, no exclusiva, no transferible
+   y limitada para instalar y usar CÓNCLAVE Agente en UN (1) equipo
+   de su propiedad, exclusivamente para uso personal o interno de su
+   organización.
+
+2. DERECHOS DE AUTOR Y PROPIEDAD INTELECTUAL
+   CÓNCLAVE Agente, incluyendo su código fuente, diseño, gráficos,
+   documentación y todos los materiales asociados, son propiedad
+   exclusiva de ceob68 / Vaultly y están protegidos por las leyes
+   de propiedad intelectual aplicables.
+
+3. RESTRICCIONES — ABSOLUTAMENTE PROHIBIDO:
+   a) Redistribuir, vender, sublicenciar, arrendar o transferir el
+      software o cualquier copia del mismo a terceros.
+   b) Copiar, reproducir o duplicar el software más allá de lo
+      estrictamente necesario para el uso autorizado.
+   c) Descompilar, desensamblar, realizar ingeniería inversa o
+      intentar obtener el código fuente del software.
+   d) Modificar, adaptar, traducir o crear obras derivadas basadas
+      en el software sin autorización expresa por escrito.
+   e) Eliminar, alterar u ocultar cualquier aviso de derechos de
+      autor, marca registrada u otra indicación de propiedad.
+   f) Usar el software para desarrollar productos competidores.
+   g) Compartir la clave de licencia con terceros.
+
+4. AUSENCIA DE GARANTÍAS
+   EL SOFTWARE SE PROPORCIONA "TAL CUAL", SIN GARANTÍAS DE NINGÚN
+   TIPO, EXPRESAS O IMPLÍCITAS, INCLUYENDO PERO NO LIMITADO A
+   GARANTÍAS DE COMERCIALIZACIÓN, ADECUACIÓN PARA UN PROPÓSITO
+   PARTICULAR O NO INFRACCIÓN.
+
+5. LIMITACIÓN DE RESPONSABILIDAD
+   En ningún caso ceob68 / Vaultly será responsable por daños
+   directos, indirectos, incidentales, especiales, ejemplares o
+   consecuentes (incluyendo pérdida de datos, interrupción del
+   negocio o pérdida de beneficios) que surjan del uso o la
+   imposibilidad de usar el software.
+
+6. TERMINACIÓN
+   Esta licencia es efectiva hasta su terminación. Sus derechos
+   bajo esta licencia se terminarán automáticamente sin previo
+   aviso si incumple cualquiera de sus términos. Al terminar,
+   debe destruir todas las copias del software en su posesión.
+
+7. PRIVACIDAD Y DATOS
+   CÓNCLAVE Agente opera completamente de forma local en su equipo.
+   No recopila, transmite ni almacena datos del usuario en servidores
+   externos. Todos los datos permanecen en su dispositivo local.
+
+8. LEY APLICABLE
+   Este acuerdo se rige por las leyes aplicables al distribuidor
+   (ceob68 / Vaultly). Cualquier disputa será resuelta en el foro
+   competente correspondiente.
+
+9. CONTACTO
+   Para consultas sobre licencias adicionales, uso comercial o
+   permisos especiales:
+   GitHub: https://github.com/ceob68
+   Vaultly: https://vaultly.ceob68.com
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+© 2026 ceob68 / Vaultly — CONCLAVE AGENTE v1.0
+Todos los derechos reservados. Prohibida la reproducción total
+o parcial sin autorización expresa por escrito.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
