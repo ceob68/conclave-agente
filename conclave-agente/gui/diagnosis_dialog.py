@@ -192,7 +192,7 @@ class DiagnosisDialog(QDialog):
         for agent_id, model_id in MODEL_REGISTRY.items():
             model_cache_name = "models--" + model_id.replace("/", "--")
             cached = os.path.exists(os.path.join(cache_dir, model_cache_name))
-            status = "✅" if cached else "❌"
+            status = "✅" if cached else "❌  (no descargado)"
             name = agent_names[agent_id] if agent_id < len(agent_names) else f"#{agent_id}"
             lines.append(f"{status}  [{name}]  {model_id}")
 

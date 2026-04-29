@@ -87,70 +87,94 @@ def _get_device_map(agent_id: int) -> dict:
     }
 
 
-def load_model_and_tokenizer(agent_id: int, model_id: Optional[str] = None,
-                              log_callback: Optional[Callable] = None):
+def load_model_and_tokenizer(model_id: str,
+                              log_callback=None):
     """
-    Load a model and tokenizer for the given agent.
-
-    Returns (model, tokenizer) or raises an exception.
-    model_id overrides the default for this agent_id.
+    Load a model and tokenizer.
+    - With CUDA GPU: uses BitsAndBytes NF4 4-bit quantization
+    - Without GPU (CPU mode): loads in float32, no quantization
     """
     _lazy_imports()
-    target_model = model_id or MODEL_REGISTRY.get(agent_id, MODEL_REGISTRY[0])
 
     if log_callback:
-        log_callback(f"[AI Engine] Cargando modelo: {target_model}")
+        log_callback(f"[AI Engine] Cargando modelo: {model_id}")
 
     # Check if model is cached locally
     cache_dir = os.path.join(os.path.expanduser("~"), ".cache", "huggingface", "hub")
-    model_cache_name = "models--" + target_model.replace("/", "--")
+    model_cache_name = "models--" + model_id.replace("/", "--")
     is_cached = os.path.exists(os.path.join(cache_dir, model_cache_name))
 
     if not is_cached:
         if log_callback:
             log_callback(
-                f"[AI Engine] ⚠️  Modelo '{target_model}' no encontrado en caché local. "
-                f"Descarga necesaria (~{_estimate_model_size(agent_id)} GB). "
-                f"Asegúrate de tener conexión a internet la primera vez."
+                f"[AI Engine] ⚠️  Modelo '{model_id}' no encontrado en caché. "
+                f"Necesita descargarse. Asegúrate de tener conexión a internet."
             )
 
-    # Quantization config
-    bnb_config = None
-    if _torch.cuda.is_available() and _bnb is not None:
-        bnb_config = _get_bnb_config()
-
-    device_kwargs = _get_device_map(agent_id)
+    cuda_available = _torch.cuda.is_available()
+    bnb_available = _bnb is not None
 
     try:
         tokenizer = _transformers.AutoTokenizer.from_pretrained(
-            target_model,
+            model_id,
             trust_remote_code=True,
         )
 
-        load_kwargs = {
-            "trust_remote_code": True,
-            "torch_dtype": _torch.bfloat16 if _torch.cuda.is_available() else _torch.float32,
-            **device_kwargs,
-        }
+        if cuda_available and bnb_available:
+            # ── GPU mode: NF4 4-bit quantization ──────────────────────────────
+            if log_callback:
+                log_callback(f"[AI Engine] Modo GPU — cuantización NF4 4-bit activada")
 
-        if bnb_config is not None:
-            load_kwargs["quantization_config"] = bnb_config
+            bnb_config = _transformers.BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_use_double_quant=True,
+                bnb_4bit_compute_dtype=_torch.bfloat16,
+            )
 
-        model = _transformers.AutoModelForCausalLM.from_pretrained(
-            target_model,
-            **load_kwargs,
-        )
+            # Determine VRAM budget
+            total_vram = _torch.cuda.get_device_properties(0).total_memory / (1024**3)
+            gpu_budget = f"{int(total_vram * 0.90)}GiB"
+
+            model = _transformers.AutoModelForCausalLM.from_pretrained(
+                model_id,
+                quantization_config=bnb_config,
+                device_map="auto",
+                max_memory={0: gpu_budget, "cpu": "16GiB"},
+                trust_remote_code=True,
+                torch_dtype=_torch.bfloat16,
+            )
+
+        else:
+            # ── CPU mode: no quantization, float32 ────────────────────────────
+            if log_callback:
+                log_callback(
+                    f"[AI Engine] Modo CPU — sin cuantización. "
+                    f"Respuestas lentas esperadas (5-20 min por agente)."
+                )
+
+            model = _transformers.AutoModelForCausalLM.from_pretrained(
+                model_id,
+                device_map="cpu",
+                trust_remote_code=True,
+                torch_dtype=_torch.float32,
+                low_cpu_mem_usage=True,
+            )
+
         model.eval()
 
         if log_callback:
-            vram_used = _get_vram_used_gb()
-            log_callback(f"[AI Engine] ✅ Modelo cargado. VRAM usada: {vram_used:.1f} GB")
+            if cuda_available:
+                vram_used = _get_vram_used_gb()
+                log_callback(f"[AI Engine] ✅ Modelo cargado. VRAM usada: {vram_used:.1f} GB")
+            else:
+                log_callback(f"[AI Engine] ✅ Modelo cargado en CPU.")
 
         return model, tokenizer
 
     except Exception as e:
         if log_callback:
-            log_callback(f"[AI Engine] ❌ Error cargando modelo: {e}")
+            log_callback(f"[AI Engine] ❌ Error cargando modelo '{model_id}': {e}")
         raise
 
 

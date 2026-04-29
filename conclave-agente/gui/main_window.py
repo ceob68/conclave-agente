@@ -25,6 +25,7 @@ from PySide6.QtGui import QAction, QIcon, QFont
 from gui.components import AgentCard, ChatBubble, DraftPanel
 from gui.app_style import AGENT_COLORS
 from gui.ai_worker import SwarmWorker
+from gui.settings_dialog import SettingsDialog, load_settings, get_hf_token
 from backend.orchestrator import load_agent_config, save_agent_config, DEFAULT_AGENTS
 from backend.database import create_session, get_all_sessions
 
@@ -34,8 +35,8 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("CÓNCLAVE Agente  v1.0")
-        self.setMinimumSize(1280, 780)
-        self.resize(1440, 900)
+        self.setMinimumSize(900, 600)
+        self.resize(1280, 820)
 
         self._agents = load_agent_config()
         self._worker: SwarmWorker | None = None
@@ -43,11 +44,21 @@ class MainWindow(QMainWindow):
         self._cycle_count = 0
         self._is_running = False
         self._is_paused = False
-        self._current_bubbles: dict[int, ChatBubble] = {}  # agent_id → current bubble
+        self._current_bubbles: dict[int, ChatBubble] = {}
+
+        # Apply HuggingFace token from settings to environment immediately
+        import os
+        hf_token = get_hf_token()
+        if hf_token:
+            os.environ["HF_TOKEN"] = hf_token
+            os.environ["HUGGING_FACE_HUB_TOKEN"] = hf_token
 
         self._setup_menu()
         self._setup_ui()
         self._setup_status_bar()
+
+        # GPU + token check after UI is built
+        QTimer.singleShot(600, self._check_gpu_on_startup)
 
     # ─── Menu ─────────────────────────────────────────────────────────────────
 
@@ -82,6 +93,11 @@ class MainWindow(QMainWindow):
 
         # Herramientas
         tools_menu = menubar.addMenu("Herramientas")
+        act_settings = QAction("⚙️  Configuración y Descarga de Modelos", self)
+        act_settings.setShortcut("Ctrl+,")
+        act_settings.triggered.connect(self._open_settings)
+        tools_menu.addAction(act_settings)
+        tools_menu.addSeparator()
         act_diag = QAction("🔬  Diagnóstico del Sistema", self)
         act_diag.triggered.connect(self._open_diagnosis)
         tools_menu.addAction(act_diag)
@@ -267,8 +283,8 @@ class MainWindow(QMainWindow):
 
     def _build_manager_bar(self) -> QWidget:
         bar = QFrame()
-        bar.setObjectName("status_bar")
-        bar.setFixedHeight(52)
+        bar.setObjectName("manager_bar")
+        bar.setFixedHeight(48)
         layout = QHBoxLayout(bar)
         layout.setContentsMargins(12, 8, 12, 8)
         layout.setSpacing(8)
@@ -591,6 +607,58 @@ class MainWindow(QMainWindow):
             "<p><small>© 2026 ceob68 / Vaultly. Todos los derechos reservados.<br>"
             "Prohibida la redistribución o ingeniería inversa.</small></p>"
         )
+
+    def _check_gpu_on_startup(self):
+        """Show warnings for missing GPU or HF token."""
+        import os
+
+        # Check HF token
+        hf_token = get_hf_token()
+        if not hf_token:
+            msg = QMessageBox(self)
+            msg.setWindowTitle("⚙️  Configuración requerida")
+            msg.setIcon(QMessageBox.Icon.Information)
+            msg.setText("<b style='color:#06B6D4; font-size:11pt;'>Token de HuggingFace no configurado</b>")
+            msg.setInformativeText(
+                "Para descargar y usar los modelos de IA (Gemma-3), necesitas:\n\n"
+                "1. Cuenta gratis en huggingface.co\n"
+                "2. Aceptar la licencia del modelo Gemma-3\n"
+                "3. Crear un token de acceso (Read)\n\n"
+                "Ve a: Herramientas → Configuración y Descarga de Modelos"
+            )
+            btn_config = msg.addButton("⚙️  Abrir Configuración", QMessageBox.ButtonRole.AcceptRole)
+            msg.addButton("Ahora no", QMessageBox.ButtonRole.RejectRole)
+            msg.exec()
+            if msg.clickedButton() == btn_config:
+                self._open_settings()
+            return  # Don't show GPU warning on top of this
+
+        # Check GPU
+        try:
+            import torch
+            if not torch.cuda.is_available():
+                msg = QMessageBox(self)
+                msg.setWindowTitle("⚠️  Sin GPU NVIDIA detectada")
+                msg.setIcon(QMessageBox.Icon.Warning)
+                msg.setText("<b style='color:#F59E0B; font-size:11pt;'>Modo CPU activado</b>")
+                msg.setInformativeText(
+                    "No se detectó GPU NVIDIA con CUDA.\n\n"
+                    "CÓNCLAVE Agente funcionará pero las respuestas\n"
+                    "tardarán entre 5 y 20 minutos por agente.\n\n"
+                    "Recomendación: activa solo 1 o 2 agentes con\n"
+                    "el modelo más pequeño (Gemma-3 2B)."
+                )
+                msg.setStandardButtons(QMessageBox.StandardButton.Ok)
+                msg.exec()
+                self._statusbar.showMessage(
+                    "⚠️  Modo CPU — Respuestas lentas esperadas  ·  CÓNCLAVE Agente v1.0"
+                )
+        except ImportError:
+            pass
+
+    def _open_settings(self):
+        dlg = SettingsDialog(self)
+        dlg.exec()
 
     def closeEvent(self, event):
         if self._is_running and self._worker:

@@ -227,8 +227,17 @@ QFrame#status_bar {{
         stop:1 rgba(13, 18, 40, 200)
     );
     border-top: 1px solid {BORDER_SUBTLE};
-    min-height: 28px;
-    max-height: 28px;
+}}
+
+QFrame#manager_bar {{
+    background: qlineargradient(
+        x1:0, y1:0, x2:1, y2:0,
+        stop:0 {BG_DEEPEST},
+        stop:1 rgba(13, 18, 40, 200)
+    );
+    border-top: 1px solid {BORDER_SUBTLE};
+    min-height: 48px;
+    max-height: 48px;
 }}
 
 /* ═══════════════════════════════════════════════════════

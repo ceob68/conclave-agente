@@ -304,7 +304,6 @@ def run_swarm_session(
 
             try:
                 model, tokenizer = ai_engine.load_model_and_tokenizer(
-                    agent_id=agent_id,
                     model_id=model_id,
                     log_callback=log_callback,
                 )
