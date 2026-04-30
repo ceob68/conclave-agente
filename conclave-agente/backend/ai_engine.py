@@ -43,11 +43,11 @@ def _lazy_imports():
 
 # Maps agent_id → HuggingFace model ID
 MODEL_REGISTRY = {
-    0: "google/gemma-3-2b-it",            # Arquitecto   — 2.6B E2B
+    0: "google/gemma-3-1b-it",            # Arquitecto   — 1B
     1: "google/gemma-3-4b-it",            # Programador  — 4.4B E4B
     2: "google/gemma-3-27b-it",           # Seguridad    — 27B (was 26B MoE)
     3: "google/gemma-3-12b-it",           # QA/UX        — 12B Dense (realistic for RTX 3060)
-    4: "google/gemma-3-2b-it",            # Documentador — 2.6B E2B
+    4: "google/gemma-3-1b-it",            # Documentador — 1B
 }
 
 # VRAM budget per model (in GB) — for max_memory config

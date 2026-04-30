@@ -19,11 +19,11 @@ from typing import Callable, Optional
 from dataclasses import dataclass, field
 
 from backend import ai_engine
+from backend import demo_engine
 from backend.database import (
     create_session, save_message, update_session_draft,
     increment_session_cycle, close_session, get_last_n_messages
 )
-
 # ─── Agent Configuration ──────────────────────────────────────────────────────
 
 DEFAULT_AGENTS = [
@@ -297,48 +297,75 @@ def run_swarm_session(
                 manager_msg=manager_msg,
             )
 
-            # ── Load model ──
-            status_callback(agent_id, "Cargando modelo...")
-            log_callback(f"[Orchestrator] 🔄 Cargando {agent_name} ({model_id})...")
-            model, tokenizer = None, None
-
+            # ── Demo mode detection ──
+            import os
             try:
-                model, tokenizer = ai_engine.load_model_and_tokenizer(
-                    model_id=model_id,
-                    log_callback=log_callback,
-                )
-            except Exception as e:
-                log_callback(f"[Orchestrator] ❌ Error cargando {agent_name}: {e}")
-                status_callback(agent_id, "Error al cargar")
-                token_callback(agent_id, f"\n[Error: No se pudo cargar el modelo. Verifica que esté descargado.]\n", True)
-                continue
-
-            # ── Generate ──
-            status_callback(agent_id, "Generando respuesta...")
-            log_callback(f"[Orchestrator] ✍️  {agent_name} generando...")
+                import torch as _t
+                cuda_ok = _t.cuda.is_available()
+            except Exception:
+                cuda_ok = False
+            _cd = os.path.join(os.path.expanduser("~"), ".cache", "huggingface", "hub")
+            _mcn = "models--" + model_id.replace("/", "--")
+            model_is_cached = os.path.exists(os.path.join(_cd, _mcn))
+            use_demo = not model_is_cached and not cuda_ok
             full_response = ""
 
-            try:
-                def on_token(t):
-                    nonlocal full_response
-                    full_response += t
-                    token_callback(agent_id, t, False)
-
-                full_response = ai_engine.generate_streaming(
-                    model=model,
-                    tokenizer=tokenizer,
-                    prompt=prompt,
-                    max_new_tokens=600,
-                    temperature=0.72,
-                    token_callback=on_token,
+            if use_demo:
+                log_callback(f"[Orchestrator] 🎭 {agent_name} — Modo Demo")
+                status_callback(agent_id, "🎭 Modo Demo")
+                full_response = demo_engine.stream_demo_response(
+                    agent_id=agent_id, topic=user_topic, cycle=cycle,
+                    token_callback=lambda t: token_callback(agent_id, t, False),
                     stop_event=stop_event,
                 )
-                token_callback(agent_id, "", True)  # Signal done
+                token_callback(agent_id, "", True)
+            else:
+                # ── Load real model ──
+                status_callback(agent_id, "Cargando modelo...")
+                log_callback(f"[Orchestrator] 🔄 Cargando {agent_name} ({model_id})...")
+                model, tokenizer = None, None
+                try:
+                    model, tokenizer = ai_engine.load_model_and_tokenizer(
+                        model_id=model_id, log_callback=log_callback,
+                    )
+                except Exception as e:
+                    log_callback(f"[Orchestrator] ❌ Error cargando {agent_name}: {e}")
+                    log_callback(f"[Orchestrator] 🎭 Activando Modo Demo como fallback")
+                    status_callback(agent_id, "🎭 Modo Demo (fallback)")
+                    full_response = demo_engine.stream_demo_response(
+                        agent_id=agent_id, topic=user_topic, cycle=cycle,
+                        token_callback=lambda t: token_callback(agent_id, t, False),
+                        stop_event=stop_event,
+                    )
+                    token_callback(agent_id, "", True)
+                    if full_response.strip():
+                        save_message(session_id, agent_id, agent_name, full_response, cycle)
+                        prev_response = full_response
+                    status_callback(agent_id, "Esperando turno...")
+                    continue
 
-            except Exception as e:
-                log_callback(f"[Orchestrator] ❌ Error generando con {agent_name}: {e}")
-                token_callback(agent_id, f"\n[Error durante la generación: {e}]\n", True)
-                full_response = ""
+                # ── Generate with real model ──
+                status_callback(agent_id, "Generando respuesta...")
+                log_callback(f"[Orchestrator] ✍️  {agent_name} generando...")
+                try:
+                    def on_token(t):
+                        nonlocal full_response
+                        full_response += t
+                        token_callback(agent_id, t, False)
+                    full_response = ai_engine.generate_streaming(
+                        model=model, tokenizer=tokenizer, prompt=prompt,
+                        max_new_tokens=600, temperature=0.72,
+                        token_callback=on_token, stop_event=stop_event,
+                    )
+                    token_callback(agent_id, "", True)
+                except Exception as e:
+                    log_callback(f"[Orchestrator] ❌ Error generando: {e}")
+                    token_callback(agent_id, f"\n[Error: {e}]\n", True)
+
+                # ── Release VRAM ──
+                status_callback(agent_id, "Liberando VRAM...")
+                ai_engine.release_model(model, log_callback=log_callback)
+                model = None
 
             # ── Save message ──
             if full_response.strip():

@@ -20,7 +20,7 @@ from gui.app_style import AGENT_COLORS
 
 # Available models for selection
 AVAILABLE_MODELS = {
-    "google/gemma-3-2b-it":  "Gemma-3 2B (Ligero, rápido)",
+    "google/gemma-3-1b-it":  "Gemma-3 1B (Más ligero, ideal CPU)",
     "google/gemma-3-4b-it":  "Gemma-3 4B (Balanceado)",
     "google/gemma-3-12b-it": "Gemma-3 12B (Potente)",
     "google/gemma-3-27b-it": "Gemma-3 27B (Máxima capacidad)",
@@ -192,7 +192,7 @@ class CustomizationDialog(QDialog):
                     default = DEFAULT_AGENTS[i]
                     tab._role_edit.setPlainText(default["role"])
                     # Reset model combo to default
-                    default_model = MODEL_REGISTRY.get(i, "google/gemma-3-2b-it")
+                    default_model = MODEL_REGISTRY.get(i, "google/gemma-3-1b-it")
                     for j in range(tab._model_combo.count()):
                         if tab._model_combo.itemData(j) == default_model:
                             tab._model_combo.setCurrentIndex(j)

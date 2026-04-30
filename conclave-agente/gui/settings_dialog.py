@@ -25,7 +25,7 @@ def load_settings() -> dict:
                 return json.load(f)
         except Exception:
             pass
-    return {"hf_token": "", "default_model": "google/gemma-3-2b-it"}
+    return {"hf_token": "", "default_model": "google/gemma-3-1b-it"}
 
 
 def save_settings(data: dict):
@@ -95,7 +95,7 @@ class DownloadWorker(QThread):
                     "❌ Error de autenticación (401).\n\n"
                     "Gemma-3 requiere:\n"
                     "1. Cuenta en huggingface.co (gratis)\n"
-                    "2. Aceptar la licencia en: huggingface.co/google/gemma-3-2b-it\n"
+                    "2. Aceptar la licencia en: huggingface.co/google/gemma-3-1b-it\n"
                     "3. Crear un token en: huggingface.co/settings/tokens\n"
                     "4. Pegar el token en el campo 'Token HuggingFace' y guardar"
                 )
@@ -103,7 +103,7 @@ class DownloadWorker(QThread):
                 msg = (
                     "❌ Acceso denegado (403).\n\n"
                     "Debes aceptar la licencia del modelo primero:\n"
-                    "Ve a huggingface.co/google/gemma-3-2b-it\n"
+                    "Ve a huggingface.co/google/gemma-3-1b-it\n"
                     "y haz clic en 'Agree and access repository'"
                 )
             elif "429" in err or "rate" in err.lower():
@@ -158,7 +158,7 @@ class SettingsDialog(QDialog):
         steps_layout = QVBoxLayout(steps_group)
         steps = [
             "1. Crea cuenta gratis en:  https://huggingface.co/join",
-            "2. Acepta la licencia en:  https://huggingface.co/google/gemma-3-2b-it",
+            "2. Acepta la licencia en:  https://huggingface.co/google/gemma-3-1b-it",
             "3. Crea tu token en:  https://huggingface.co/settings/tokens  (tipo Read)",
         ]
         for step in steps:
@@ -211,7 +211,7 @@ class SettingsDialog(QDialog):
 
         dl_info = QLabel(
             "Descarga el modelo mínimo para empezar a usar CÓNCLAVE Agente.\n"
-            "Gemma-3 2B es el más ligero (~1.5 GB) y funciona bien en CPU."
+            "Gemma-3 1B es el más ligero (~0.8 GB) y funciona bien en CPU."
         )
         dl_info.setWordWrap(True)
         dl_info.setStyleSheet("color: #8892A4; font-size: 9pt;")
@@ -229,7 +229,7 @@ class SettingsDialog(QDialog):
         from PySide6.QtWidgets import QComboBox
         self._model_combo = QComboBox()
         models = [
-            ("google/gemma-3-2b-it", "Gemma-3 2B  —  ~1.5 GB  —  Recomendado para CPU"),
+            ("google/gemma-3-1b-it", "Gemma-3 1B  —  ~0.8 GB  —  Recomendado para CPU"),
             ("google/gemma-3-4b-it", "Gemma-3 4B  —  ~2.5 GB  —  Mejor calidad"),
             ("microsoft/phi-4",      "Phi-4 (Microsoft)  —  ~8 GB  —  Excelente en CPU"),
             ("Qwen/Qwen2.5-1.5B-Instruct", "Qwen 2.5 1.5B  —  ~1 GB  —  Ultra ligero"),
